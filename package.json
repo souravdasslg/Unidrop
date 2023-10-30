@@ -14,9 +14,10 @@
     "tsconfig": "*",
     "turbo": "latest"
   },
-  "packageManager": "bun@1.0.4",
+  "packageManager": "bun@1.0.7",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "frontend/*",
+    "packages/*",
+    "app/*"
   ]
 }
