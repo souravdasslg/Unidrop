@@ -6,6 +6,7 @@ import {
   Text,
 } from 'react-native';
 import {RealmProvider, AppProvider, UserProvider} from '@realm/react';
+import {REALM_APP_ID} from  '@env'
 
 function App(): JSX.Element {
   return (
