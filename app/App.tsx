@@ -1,31 +1,27 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  Text,
-} from 'react-native';
-import {RealmProvider, AppProvider, UserProvider} from '@realm/react';
-import {REALM_APP_ID} from  '@env'
+import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {AppProvider, UserProvider} from '@realm/react';
+import {Login} from './features/login';
+import {REALM_APP_ID} from '@env'; // Commented out as the module '@env' cannot be found
 
 function App(): JSX.Element {
   return (
-    <AppProvider>
-      <UserProvider>
-        <RealmProvider
-          sync={{
-            flexible: true,
-        }}>
-          <SafeAreaView>
-            <StatusBar barStyle={'dark-content'} />
-            <ScrollView contentInsetAdjustmentBehavior="automatic">
-              <Text>Unidrop</Text>
-            </ScrollView>
-          </SafeAreaView>
-        </RealmProvider>
-      </UserProvider>
-    </AppProvider>
+    <SafeAreaView>
+      <AppProvider id={REALM_APP_ID}>
+        <UserProvider fallback={Login}>
+          <View style={style.container}>
+            <Text>Unidrop</Text>
+          </View>
+        </UserProvider>
+      </AppProvider>
+    </SafeAreaView>
   );
 }
 
 export default App;
+
+const style = StyleSheet.create({
+  container: {
+    alignSelf: 'center',
+  },
+});
