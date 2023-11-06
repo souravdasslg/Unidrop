@@ -5,8 +5,8 @@ import {useApp, Realm} from '@realm/react';
 export const Login = () => {
   const app = useApp();
   const signInAnonymously = useCallback(async () => {
-    const credentials = Realm.Credentials.anonymous();
-    await app.logIn(credentials);
+    const credentials = Realm.Credentials.anonymous(true);
+    await app.logIn(app.currentUser ?? credentials);
   }, [app]);
 
   useEffect(() => {

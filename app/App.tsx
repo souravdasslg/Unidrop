@@ -1,17 +1,26 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
-import {AppProvider, UserProvider} from '@realm/react';
+import {AppProvider, createRealmContext, UserProvider} from '@realm/react';
 import {Login} from './features/login';
-import {REALM_APP_ID} from '@env'; // Commented out as the module '@env' cannot be found
+import {REALM_APP_ID} from '@env';
+import {Session} from './models';
+
+const realmConfig: Realm.Configuration = {
+  schema: [Session],
+};
+
+const {RealmProvider} = createRealmContext(realmConfig);
 
 function App(): JSX.Element {
   return (
     <SafeAreaView>
       <AppProvider id={REALM_APP_ID}>
         <UserProvider fallback={Login}>
-          <View style={style.container}>
-            <Text>Unidrop</Text>
-          </View>
+          <RealmProvider sync={{flexible: true}}>
+            <View style={style.container}>
+              <Text>Unidrop</Text>
+            </View>
+          </RealmProvider>
         </UserProvider>
       </AppProvider>
     </SafeAreaView>
