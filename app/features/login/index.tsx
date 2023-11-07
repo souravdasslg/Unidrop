@@ -1,17 +1,25 @@
 import {View, StyleSheet, Text} from 'react-native';
-import React, {useCallback, useEffect} from 'react';
-import {useApp, Realm} from '@realm/react';
+import React, {useEffect, useState} from 'react';
+import auth from '@react-native-firebase/auth';
 
 export const Login = () => {
-  const app = useApp();
-  const signInAnonymously = useCallback(async () => {
-    const credentials = Realm.Credentials.anonymous(true);
-    await app.logIn(app.currentUser ?? credentials);
-  }, [app]);
+  const [authState, setAuthState] = useState<Boolean | undefined>(undefined);
 
   useEffect(() => {
-    signInAnonymously();
-  }, [signInAnonymously]);
+    auth().onAuthStateChanged(authResult => {
+      if (authResult === null) {
+        setAuthState(false);
+      } else {
+        setAuthState(true);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (authState === false) {
+      auth().signInAnonymously();
+    }
+  }, [authState]);
 
   return (
     <View style={style.container}>

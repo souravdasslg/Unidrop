@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import {useUser, useRealm, useQuery} from '@realm/react';
 import {Session} from '../models';
 import {BSON} from 'realm';
@@ -6,11 +6,9 @@ import {BSON} from 'realm';
 export const useWebRTCSignal = () => {
   const realm = useRealm();
   const user = useUser();
-  const sessions = useQuery(
-    Session,
-    //       collection =>
-    // collection.filtered(`senderId != "${user.id}"`),
-  );
+  const sessions = useQuery(Session, sessions => {
+    return sessions.sorted(['createdAt']);
+  });
 
   const initiateSession = useCallback(
     (senderPeerDetails: string) => {
@@ -24,18 +22,22 @@ export const useWebRTCSignal = () => {
     },
     [realm, user.id],
   );
+
   useEffect(() => {
-    const createSessionSubscription = async () => {
-      await sessions.subscribe({name: 'incoming_session'});
-    };
-    createSessionSubscription().catch(console.error);
+    sessions.subscribe({name: 'incoming_session'}).catch(console.error);
     realm.subscriptions.findByName('incoming_session');
-  }, [realm.subscriptions, sessions]);
+    return () => sessions.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    console.log('Session updated', sessions);
+  }, [sessions]);
 
   return useMemo(
     () => ({
       initiateSession,
+      sessions: sessions.filter(session => session.senderId !== user.id),
     }),
-    [initiateSession],
+    [initiateSession, sessions, user.id],
   );
 };
