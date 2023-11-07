@@ -1,25 +1,23 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
-import {AppProvider, createRealmContext, UserProvider} from '@realm/react';
+import {SafeAreaView} from 'react-native';
+import {AppProvider, RealmProvider, UserProvider} from '@realm/react';
 import {Login} from './features/login';
 import {REALM_APP_ID} from '@env';
 import {Session} from './models';
+import {ShareScreen} from './features/sharescreen';
 
 const realmConfig: Realm.Configuration = {
   schema: [Session],
 };
 
-const {RealmProvider} = createRealmContext(realmConfig);
 
 function App(): JSX.Element {
   return (
     <SafeAreaView>
       <AppProvider id={REALM_APP_ID}>
         <UserProvider fallback={Login}>
-          <RealmProvider sync={{flexible: true}}>
-            <View style={style.container}>
-              <Text>Unidrop</Text>
-            </View>
+          <RealmProvider {...realmConfig} sync={{flexible: true}}>
+            <ShareScreen />
           </RealmProvider>
         </UserProvider>
       </AppProvider>
@@ -29,8 +27,3 @@ function App(): JSX.Element {
 
 export default App;
 
-const style = StyleSheet.create({
-  container: {
-    alignSelf: 'center',
-  },
-});

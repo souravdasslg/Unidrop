@@ -1,18 +1,22 @@
 import {useCallback, useEffect, useMemo} from 'react';
 import {useUser, useRealm, useQuery} from '@realm/react';
 import {Session} from '../models';
+import {BSON} from 'realm';
 
 export const useWebRTCSignal = () => {
   const realm = useRealm();
   const user = useUser();
-  const sessions = useQuery(Session, collection =>
-    collection.filtered(`senderId !== ${user.id}`),
+  const sessions = useQuery(
+    Session,
+    //       collection =>
+    // collection.filtered(`senderId != "${user.id}"`),
   );
 
   const initiateSession = useCallback(
     (senderPeerDetails: string) => {
       realm.write(() => {
-        return realm.create(Session, {
+        realm.create(Session, {
+          _id: new BSON.ObjectID(),
           senderId: user.id,
           senderPeerDetails,
         });
@@ -25,7 +29,7 @@ export const useWebRTCSignal = () => {
       await sessions.subscribe({name: 'incoming_session'});
     };
     createSessionSubscription().catch(console.error);
-    realm.subscriptions.findByName('incoming_session')
+    realm.subscriptions.findByName('incoming_session');
   }, [realm.subscriptions, sessions]);
 
   return useMemo(

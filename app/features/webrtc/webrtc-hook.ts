@@ -7,15 +7,15 @@ const RTC_PEER_CONFIGURATION = {
 };
 
 export const useWebRTC = () => {
-  const [peerConnection, setPeerConnection] = useState(RTCPeerConnection);
-  const {initiateSession} = useWebRTCSignal();
+  const [peerConnection, setPeerConnection] = useState();
+   const {initiateSession} = useWebRTCSignal();
 
   const createOffer = useCallback(async () => {
     const peerConnection = new RTCPeerConnection(RTC_PEER_CONFIGURATION);
     const offer = await peerConnection.createOffer({});
     await peerConnection.setLocalDescription(offer);
     // send this offer through the signalling channel
-    initiateSession(offer);
+    initiateSession(JSON.stringify(offer));
     return offer;
   }, [initiateSession]);
 
@@ -27,6 +27,6 @@ export const useWebRTC = () => {
   }, []);
 
   return {
-    createOffer,
+    initiateSession: createOffer,
   };
 };
