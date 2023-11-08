@@ -1,43 +1,65 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {useUser, useRealm, useQuery} from '@realm/react';
-import {Session} from '../models';
-import {BSON} from 'realm';
+import database from '@react-native-firebase/database';
+import {getUniqueId} from 'react-native-device-info';
+import {metadata} from "web/src/app/layout";
 
+type Session = {
+  offer: string;
+  offerFrom: string;
+  key: string;
+  creator: string;
+};
+const getDBRef = async () => {
+  const creatorId = await getUniqueId();
+  return database().ref(`/session/${creatorId}`);
+}
 export const useWebRTCSignal = () => {
-  const realm = useRealm();
-  const user = useUser();
-  const sessions = useQuery(Session, sessions => {
-    return sessions.sorted(['createdAt']);
-  });
-
-  const initiateSession = useCallback(
-    (senderPeerDetails: string) => {
-      realm.write(() => {
-        realm.create(Session, {
-          _id: new BSON.ObjectID(),
-          senderId: user.id,
-          senderPeerDetails,
-        });
-      });
-    },
-    [realm, user.id],
-  );
+  const [sessions, setSession] = useState<Session[]>([]);
 
   useEffect(() => {
-    sessions.subscribe({name: 'incoming_session'}).catch(console.error);
-    realm.subscriptions.findByName('incoming_session');
-    return () => sessions.unsubscribe();
+    ref.on('value', async snapshot => {
+      const jsonData = snapshot.toJSON();
+
+      setSession(
+        [...(Object.values(jsonData ?? []) as Session[])].filter(
+          s => true
+        ),
+      );
+    });
+
+    return () => ref.off('value', () => console.log('Subscriber disconnected'));
+  }, []);
+
+  const initiateSession = useCallback(async (offer: string) => {
+    const newRef = ref.push();
+    newRef
+      .set({
+        offer,
+        key: newRef.key,
+      })
+      .then(() => console.log('Data set.'))
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
-    console.log('Session updated', sessions);
+    // console.log('Session updated', sessions);
   }, [sessions]);
+
+  const saveAnswer = useCallback(async (offer: any, answer: string) => {
+    const creatorId = await getUniqueId();
+    await database()
+      .ref(`/session/${creatorId}/${offer.key}`)
+      .update({
+        answer: JSON.stringify(answer),
+      });
+  }, []);
 
   return useMemo(
     () => ({
       initiateSession,
-      sessions: sessions.filter(session => session.senderId !== user.id),
+      saveAnswer,
+      sessions,
     }),
-    [initiateSession, sessions, user.id],
+    [initiateSession, sessions, saveAnswer],
   );
 };

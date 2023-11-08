@@ -4,10 +4,16 @@ import React from 'react';
 import {useWebRTCSignal} from '../../hooks/useWebrtcSignal';
 
 export const ShareScreen = () => {
-  const {initiateSession} = useWebRTC();
+  const {initiateSession, createAnswerOffer} = useWebRTC();
   const {sessions} = useWebRTCSignal();
-  const showPeerData = (peerData: string) => {
-    Alert.alert('Peer Details', peerData);
+  const showPeerData = (item: object) => {
+    Alert.alert('Alert Title', item.offer, [
+      {
+        text: 'Create Answer',
+        onPress: () => createAnswerOffer(item),
+      },
+      {text: 'OK', onPress: () => console.log('OK Pressed')},
+    ]);
   };
   return (
     <View style={styles.container}>
@@ -15,12 +21,9 @@ export const ShareScreen = () => {
       <FlatList
         data={sessions}
         renderItem={({item}) => (
-          <Button
-            title={item.senderId}
-            onPress={() => showPeerData(item.senderPeerDetails)}
-          />
+          <Button title={item.key} onPress={() => showPeerData(item)} />
         )}
-        keyExtractor={item => item._id.toString()} // add a key extractor if 'id' is present in the items
+        keyExtractor={item => item.key}
       />
     </View>
   );

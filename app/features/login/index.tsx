@@ -23,7 +23,8 @@ export const Login = () => {
 
   return (
     <View style={style.container}>
-      <Text>Login</Text>
+      {authState === undefined ? <Text>Logging in ...</Text> : authState === true ? <Text>Logged in</Text> : <Text></Text>}
+
     </View>
   );
 };
